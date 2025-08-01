@@ -1,7 +1,18 @@
-import React from 'react'
+import Link from "next/link";
+import React from "react";
 
-export default function header() {
+export default function Header() {
   return (
-    <div>header</div>
-  )
+    <nav className="container flex items-center justify-between">
+      <div>
+        <Link href="/">Sommaire</Link>
+      </div>
+      <div>
+        <Link href="/#pricing">Pricing</Link>
+      </div>
+      <div>
+        <Link href="/sign-in">Sign In</Link>
+      </div>
+    </nav>
+  );
 }
