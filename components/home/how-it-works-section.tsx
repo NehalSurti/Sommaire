@@ -1,4 +1,4 @@
-import { BrainCircuit, FileOutput, FileText } from "lucide-react";
+import { BrainCircuit, FileOutput, FileText, MoveRight } from "lucide-react";
 import { ReactNode } from "react";
 
 type Step = {
@@ -53,7 +53,20 @@ export default function HowItWorksSection() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto relative">
           {steps.map((step, idx) => {
-            return <StepItem key={idx} {...step} />;
+            return (
+              <div key={idx} className="relative flex items-stretch">
+                <StepItem {...step} />
+                {idx < steps.length - 1 && (
+                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+                    <MoveRight
+                      size={32}
+                      strokeWidth={1}
+                      className="text-rose-400"
+                    ></MoveRight>
+                  </div>
+                )}
+              </div>
+            );
           })}
         </div>
       </div>
@@ -63,7 +76,7 @@ export default function HowItWorksSection() {
 
 function StepItem({ icon, label, description }: Step) {
   return (
-    <div className="relative p-6 rounded-2xl bg-white/5 backdrop-blur-xs border border-white/10 hover:border-rose-500/5 transition-colors group w-full">
+    <div className="relative p-6 rounded-2xl bg-white/5 backdrop-blur-xs border border-white/10 hover:border-rose-500/30 transition-colors group w-full">
       <div className="flex flex-col gap-4 h-full">
         <div className="flex items-center justify-center h-24 w-24 mx-auto rounded-2xl bg-linear-to-br from-rose-500/10 to-transparent group-hover:from-rose-500/20 transition-colors text-rose-500">
           {icon}
