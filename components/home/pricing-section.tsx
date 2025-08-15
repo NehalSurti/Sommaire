@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { CheckIcon } from "lucide-react";
+import { ArrowRight, CheckIcon } from "lucide-react";
 import Link from "next/link";
 
 type PriceType = {
@@ -52,7 +52,7 @@ const PricingCard = ({
   priceId,
 }: PriceType) => {
   return (
-    <div className="relative w-full max-w-lg">
+    <div className="relative w-full max-w-lg hover:scale-105 hover:transition-all duration-300">
       <div
         className={cn(
           "relative flex flex-col h-full gap-4 lg:gap-8 z-10 p-8 border-[1px] border-gray-500/20 rounded-2xl",
@@ -90,7 +90,7 @@ const PricingCard = ({
                 : "border-rose-100 from-rose-400 to-rose-500"
             )}
           >
-            Buy Now
+            Buy Now <ArrowRight size={18}></ArrowRight>
           </Link>
         </div>
       </div>
@@ -100,10 +100,10 @@ const PricingCard = ({
 
 export default function PricingSection() {
   return (
-    <section>
+    <section className="relative overflow-hidden" id="pricing">
       <div className="py-12 lg:py-24 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 lg:pt-12">
-        <div>
-          <h2>Pricing</h2>
+        <div className="flex items-center justify-center w-full pb-12">
+          <h2 className="uppercase font-bold text-xl text-rose-500">Pricing</h2>
         </div>
         <div className="relative flex justify-center flex-col lg:flex-row items-center lg:items-stretch gap-8">
           {plans.map((plan) => {
