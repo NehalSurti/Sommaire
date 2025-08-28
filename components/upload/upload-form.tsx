@@ -1,4 +1,5 @@
 "use client";
+import { getUploadSignedURL } from "@/actions/bucketActions";
 import UploadFormInput from "./upload-form-input";
 import { z } from "zod";
 
@@ -15,7 +16,7 @@ const inputSchema = z.object({
 });
 
 export default function UploadForm() {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const file = formData.get("file") as File;
@@ -32,6 +33,21 @@ export default function UploadForm() {
       console.log("Validation errors:", fieldErrors);
     } else {
       console.log("Validation:", validatedFields.data);
+
+      const signedURLResult = await getUploadSignedURL(
+        validatedFields.data.file.name,
+        validatedFields.data.file.type
+      );
+
+      const url = signedURLResult.success.url;
+
+      await fetch(url, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+
+      alert("PDF uploaded successfully!");
     }
   };
   return (
