@@ -16,7 +16,7 @@ export default function UploadFormInput({ onSubmit }: UploadFormInputProps) {
           name="file"
           accept="application/pdf"
           required
-          className=""
+          className="cursor-pointer"
         />
         <Button>Upload your PDF</Button>
       </div>

@@ -1,41 +1,81 @@
 "use server"
 
 import { s3Client, BUCKET_NAME } from "@/lib/s3"
-import { PutObjectCommand } from "@aws-sdk/client-s3"
-import {
-    getSignedUrl,
-} from "@aws-sdk/s3-request-presigner";
+import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { z } from "zod";
+import { auth } from '@clerk/nextjs/server'
+import crypto from "crypto"
 
 const uploadSchema = z.object({
-    fileName: z.string().min(1).max(200).regex(/^[a-zA-Z0-9._-]+$/, {
-        message: "File name contains invalid characters",
-    }),
+    fileName: z.string()
+        .min(1)
+        .max(200),
+    // .regex(/^[a-zA-Z0-9._-]+$/, {
+    //     message: "File name contains invalid characters",
+    // }),
     fileType: z
         .string()
         .min(1)
-        .regex(/^[-\w.]+\/[-\w.+]+$/, { message: "Invalid MIME type" }),
+        .regex(/^[-\w.]+\/[-\w.+]+$/, { message: "Invalid MIME type" })
+        .refine((type) => type === "application/pdf", {
+            message: "Only PDF files are allowed",
+        }),
+
+    fileSize: z
+        .number()
+        .min(1)
+        .max(20 * 1024 * 1024) // max 20MB
+
 });
 
-export async function getUploadSignedURL(fileName: string, fileType: string) {
+const generateFileName = (bytes = 32) =>
+    crypto.randomBytes(bytes).toString("hex")
+
+
+export async function getUploadSignedURL(fileName: string, fileType: string, fileSize: number, checksum: string) {
     try {
 
+        const { userId } = await auth()
+
+        if (!userId) {
+            return {
+                success: false,
+                errorCode: "AUTHENTICATION_ERROR",
+                error: "Not Authenticated",
+            };
+        }
+
+        const validated = uploadSchema.parse({ fileName, fileType, fileSize });
+
+        const key = generateFileName();
 
         const putObjectCommand = new PutObjectCommand({
             Bucket: BUCKET_NAME,
-            Key: `${fileName}`,
-            ContentType: fileType
+            Key: key,
+            ContentType: validated.fileType,
+            ContentLength: validated.fileSize,
+            ChecksumSHA256: checksum,
+            Metadata: {
+                userId
+            }
         });
 
         const signedURL = await getSignedUrl(s3Client, putObjectCommand, { expiresIn: 60 });
 
-        return { success: { url: signedURL } }
+        return {
+            success: true,
+            url: signedURL,
+            key: key,
+            bucket: BUCKET_NAME,
+        };
     } catch (error) {
         if (error instanceof z.ZodError) {
             return {
                 success: false,
+                errorCode: "VALIDATION_ERROR",
                 error: "Validation failed",
-                details: error.errors,
+                details: error,
             };
         }
         console.error("Error generating signed URL:", error);
@@ -44,7 +84,4 @@ export async function getUploadSignedURL(fileName: string, fileType: string) {
             error: (error as Error).message,
         };
     }
-
-
-
 }
