@@ -4,6 +4,7 @@ import UploadFormInput from "./upload-form-input";
 import { z } from "zod";
 import { useState } from "react";
 import { toast } from "sonner";
+import { generatePdfSummary } from "@/actions/processPdfActions";
 
 const inputSchema = z.object({
   file: z
@@ -61,8 +62,8 @@ export default function UploadForm() {
     try {
       setLoading(true);
 
-      toast.info("📄 Processing PDF", {
-        description: "Hang tight! Our AI is reading through your document! ✨",
+      toast.info("Uploading PDF...", {
+        description: "We are uploading your PDF!",
       });
 
       console.log("Validation:", validatedFields.data);
@@ -102,6 +103,12 @@ export default function UploadForm() {
       }
 
       toast.success("PDF uploaded successfully!");
+
+      toast.info("📄 Processing PDF", {
+        description: "Hang tight! Our AI is reading through your document! ✨",
+      });
+
+      const summary = await generatePdfSummary(validFile);
       // e.currentTarget.reset();
     } catch (err) {
       console.error("Upload error:", err);
