@@ -5,6 +5,8 @@ import { z } from "zod";
 import { useState } from "react";
 import { toast } from "sonner";
 import { generatePdfSummary } from "@/actions/processPdfActions";
+import { useAuth } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 
 const inputSchema = z.object({
   file: z
@@ -33,6 +35,11 @@ async function calculateSHA256(file: File): Promise<string> {
 
 export default function UploadForm() {
   const [loading, setLoading] = useState(false);
+  const { isSignedIn, userId } = useAuth();
+
+  if (!isSignedIn) {
+    redirect("/sign-in");
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -108,7 +115,19 @@ export default function UploadForm() {
         description: "Hang tight! Our AI is reading through your document! ✨",
       });
 
-      const summary = await generatePdfSummary(validFile);
+      const uploadRes = [
+        {
+          serverData: {
+            userId: userId,
+            file: {
+              url: "https://example.com/file.pdf",
+              name: validFile.name,
+            },
+          },
+        },
+      ];
+
+      const summary = await generatePdfSummary(uploadRes);
       // e.currentTarget.reset();
     } catch (err) {
       console.error("Upload error:", err);
