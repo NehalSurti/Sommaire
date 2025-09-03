@@ -10,12 +10,14 @@ import { redirect } from "next/navigation";
 
 const inputSchema = z.object({
   file: z
-    .file({ message: "Invalid File" })
-    .mime(["application/pdf"], {
+    .instanceof(File, { message: "Invalid File" })
+    .refine((file) => file.type === "application/pdf", {
       message: "Invalid file type. File must be a PDF.",
     })
-    .min(10_000, { message: "File is too small. Minimum size is 10 KB." })
-    .max(20 * 1024 * 1024, {
+    .refine((file) => file.size >= 10_000, {
+      message: "File is too small. Minimum size is 10 KB.",
+    })
+    .refine((file) => file.size <= 20 * 1024 * 1024, {
       message: "File is too large. Maximum size is 20 MB.",
     }),
 });
@@ -109,6 +111,8 @@ export default function UploadForm() {
         throw new Error(`Upload failed with status ${uploadResponse.status}`);
       }
 
+      console.log("s3 uploadResponse response : ", uploadResponse);
+
       toast.success("PDF uploaded successfully!");
 
       toast.info("📄 Processing PDF", {
@@ -127,7 +131,7 @@ export default function UploadForm() {
         },
       ];
 
-      const summary = await generatePdfSummary(uploadRes);
+      // const summary = await generatePdfSummary(uploadRes);
       // e.currentTarget.reset();
     } catch (err) {
       console.error("Upload error:", err);
