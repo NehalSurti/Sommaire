@@ -1,5 +1,5 @@
 "use client";
-import { getUploadSignedURL } from "@/actions/bucketActions";
+import { getDownloadUrl, getUploadSignedURL } from "@/actions/bucketActions";
 import UploadFormInput from "./upload-form-input";
 import { z } from "zod";
 import { useState } from "react";
@@ -112,6 +112,26 @@ export default function UploadForm() {
       }
 
       console.log("s3 uploadResponse response : ", uploadResponse);
+
+      const uploadResponseUrl = uploadResponse.url;
+      const fileKey = new URL(uploadResponseUrl).pathname.split("/").pop();
+
+      console.log("fileKey : ", fileKey);
+
+      const downloadURLResult = await getDownloadUrl(fileKey as string);
+
+      console.log("downloadURLResult : ", downloadURLResult);
+
+      if (!downloadURLResult.success) {
+        console.error("Signed download URL error:", downloadURLResult);
+        toast.error("Signed download URL error", {
+          description: downloadURLResult.error,
+        });
+        return;
+      }
+
+      const downloadUrl = downloadURLResult.url;
+      window.open(downloadUrl, "_blank");
 
       toast.success("PDF uploaded successfully!");
 

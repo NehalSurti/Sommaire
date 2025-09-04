@@ -35,6 +35,7 @@ export async function generatePdfSummary(uploadResponse: Array<{
 
     try {
         const pdfText = await fetchAndExtractPdfText(pdfUrl);
+        console.log("pdfText : ", pdfText);
     } catch (error) {
         console.error("Error uploading file:", error);
         return {
