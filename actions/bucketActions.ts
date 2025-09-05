@@ -7,10 +7,13 @@ import { z } from "zod";
 import { auth } from '@clerk/nextjs/server'
 import crypto from "crypto"
 
+
+/* --------------------------------- Schemas -------------------------------- */
+
 const uploadSchema = z.object({
     fileName: z.string()
-        .min(1)
-        .max(200),
+        .min(1, "File name is required")
+        .max(200, "File name is too long"),
     // .regex(/^[a-zA-Z0-9._-]+$/, {
     //     message: "File name contains invalid characters",
     // }),
@@ -24,33 +27,37 @@ const uploadSchema = z.object({
 
     fileSize: z
         .number()
-        .min(1)
-        .max(20 * 1024 * 1024) // max 20MB
+        .min(1, "File size must be greater than 0")
+        .max(20 * 1024 * 1024, "File size exceeds 20MB")
 
 });
 
 const downloadSchema = z.object({
     fileName: z.string()
-        .min(1)
-        .max(200),
+        .min(1, "File name is required")
+        .max(200, "File name is too long"),
 })
+
+
+/* -------------------------------- Utilities ------------------------------- */
 
 const generateFileName = (bytes = 32) =>
     crypto.randomBytes(bytes).toString("hex")
 
+async function requireAuth() {
+    const { userId } = await auth();
+    if (!userId) {
+        throw new Error("AUTHENTICATION_ERROR: Not Authenticated");
+    }
+    return userId;
+}
+
+/* ------------------------------ API Functions ----------------------------- */
 
 export async function getUploadSignedURL(fileName: string, fileType: string, fileSize: number, checksum: string) {
     try {
 
-        const { userId } = await auth()
-
-        if (!userId) {
-            return {
-                success: false,
-                errorCode: "AUTHENTICATION_ERROR",
-                error: "Not Authenticated",
-            };
-        }
+        const userId = await requireAuth();
 
         const validated = uploadSchema.parse({ fileName, fileType, fileSize });
 
@@ -94,15 +101,7 @@ export async function getUploadSignedURL(fileName: string, fileType: string, fil
 
 export async function getDownloadUrl(fileName: string) {
     try {
-        const { userId } = await auth()
-
-        if (!userId) {
-            return {
-                success: false,
-                errorCode: "AUTHENTICATION_ERROR",
-                error: "Not Authenticated",
-            };
-        }
+        await requireAuth();
 
         const validated = downloadSchema.parse({ fileName });
 

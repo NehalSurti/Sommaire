@@ -1,13 +1,15 @@
 "use client";
+
 import { getDownloadUrl, getUploadSignedURL } from "@/actions/bucketActions";
 import UploadFormInput from "./upload-form-input";
 import { z } from "zod";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { generatePdfSummary } from "@/actions/processPdfActions";
 import { useAuth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
+// Zod validation schema
 const inputSchema = z.object({
   file: z
     .instanceof(File, { message: "Invalid File" })
@@ -22,6 +24,7 @@ const inputSchema = z.object({
     }),
 });
 
+// Utility: SHA-256 checksum generator
 async function calculateSHA256(file: File): Promise<string> {
   // Read the file into an ArrayBuffer
   const buffer = await file.arrayBuffer();
@@ -38,6 +41,7 @@ async function calculateSHA256(file: File): Promise<string> {
 export default function UploadForm() {
   const [loading, setLoading] = useState(false);
   const { isSignedIn, userId } = useAuth();
+  const formRef = useRef<HTMLFormElement>(null);
 
   if (!isSignedIn) {
     redirect("/sign-in");
@@ -116,13 +120,15 @@ export default function UploadForm() {
       const uploadResponseUrl = uploadResponse.url;
       const fileKey = new URL(uploadResponseUrl).pathname.split("/").pop();
 
+      if (!fileKey) throw new Error("Failed to extract file key.");
+
       console.log("fileKey : ", fileKey);
 
-      const downloadURLResult = await getDownloadUrl(fileKey as string);
+      const downloadURLResult = await getDownloadUrl(fileKey);
 
       console.log("downloadURLResult : ", downloadURLResult);
 
-      if (!downloadURLResult.success) {
+      if (!downloadURLResult.success || !downloadURLResult.url) {
         console.error("Signed download URL error:", downloadURLResult);
         toast.error("Signed download URL error", {
           description: downloadURLResult.error,
@@ -131,7 +137,6 @@ export default function UploadForm() {
       }
 
       const downloadUrl = downloadURLResult.url;
-      window.open(downloadUrl, "_blank");
 
       toast.success("PDF uploaded successfully!");
 
@@ -144,14 +149,29 @@ export default function UploadForm() {
           serverData: {
             userId: userId,
             file: {
-              url: "https://example.com/file.pdf",
-              name: validFile.name,
+              url: downloadUrl,
+              name: fileKey,
             },
           },
         },
       ];
 
-      // const summary = await generatePdfSummary(uploadRes);
+      const summary = await generatePdfSummary(uploadRes);
+
+      if (!summary || !summary.success) {
+        console.error("Summary generation error:", summary);
+        toast.error("Summary generation error");
+        return;
+      }
+
+      const { data = null } = summary;
+
+      if (data) {
+        toast.info("📄 Saving PDF...", {
+          description: "Hang tight! We are saving your summary! ✨",
+        });
+      }
+      formRef.current?.reset();
       // e.currentTarget.reset();
     } catch (err) {
       console.error("Upload error:", err);
@@ -164,7 +184,7 @@ export default function UploadForm() {
   };
   return (
     <div className="flex flex-col gap-8 w-full max-w-2xl mx-auto">
-      <UploadFormInput onSubmit={handleSubmit}></UploadFormInput>
+      <UploadFormInput ref={formRef} onSubmit={handleSubmit}></UploadFormInput>
       {/* {Object.values(errors).length > 0 && (
         <div className="text-red-600">
           {Object.entries(errors).map(([field, message]) => (

@@ -13,6 +13,11 @@ export async function generatePdfSummary(uploadResponse: Array<{
     }
 }>) {
 
+    const { userId: user_ID } = await auth();
+    if (!user_ID) {
+        throw new Error("AUTHENTICATION_ERROR: Not Authenticated");
+    }
+
     if (!uploadResponse) {
         return {
             success: false,
