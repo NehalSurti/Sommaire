@@ -6,7 +6,7 @@ import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
  * @returns The full text of the PDF
  */
 
-export async function fetchAndExtractPdfText(fileUrl: string): Promise<string> {
+export async function fetchAndExtractPdfText(fileUrl: string) {
     try {
         const response = await fetch(fileUrl);
 
@@ -20,9 +20,17 @@ export async function fetchAndExtractPdfText(fileUrl: string): Promise<string> {
 
         const docs = await loader.load();
 
-        return docs.map((doc) => doc.pageContent).join('\n');
+        const parsedPdf = docs.map((doc) => doc.pageContent).join('\n');
+        return {
+            success: true,
+            data: parsedPdf
+        }
     } catch (error) {
         console.error("Error fetching or parsing PDF:", error);
-        return "";
+        return {
+            success: false,
+            data: null,
+            error: "Error fetching or parsing PDF"
+        };
     }
 }

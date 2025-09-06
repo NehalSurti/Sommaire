@@ -1,5 +1,6 @@
 "use server"
 
+import { generateSummaryFromGemini } from "@/lib/geminiai";
 import { fetchAndExtractPdfText } from "@/lib/langchain";
 import { auth } from '@clerk/nextjs/server'
 
@@ -40,7 +41,20 @@ export async function generatePdfSummary(uploadResponse: Array<{
 
     try {
         const pdfText = await fetchAndExtractPdfText(pdfUrl);
-        console.log("pdfText : ", pdfText);
+
+        if (!pdfText.success || !pdfText.data) {
+            throw new Error(pdfText.error);
+        }
+        console.log("pdfText : ", pdfText.data);
+
+        let summary;
+        try {
+            summary = await generateSummaryFromGemini(pdfText.data);
+        } catch (geminiError) {
+            console.error("Gemini API failed", geminiError);
+            throw new Error("Failed to generate summary with available AI Provider");
+        }
+
     } catch (error) {
         console.error("Error uploading file:", error);
         return {

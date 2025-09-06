@@ -49,30 +49,29 @@ export default function UploadForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    try {
+      if (loading) return; // prevent double submit
 
-    if (loading) return; // prevent double submit
+      const formData = new FormData(e.currentTarget);
+      const file = formData.get("file") as File;
 
-    const formData = new FormData(e.currentTarget);
-    const file = formData.get("file") as File;
+      const validatedFields = inputSchema.safeParse({ file });
 
-    const validatedFields = inputSchema.safeParse({ file });
+      if (!validatedFields.success) {
+        let fieldErrors: Record<string, string> = {};
 
-    if (!validatedFields.success) {
-      let fieldErrors: Record<string, string> = {};
+        for (const issue of validatedFields.error.issues) {
+          const key = issue.path?.join(".") || "unknown_field";
+          fieldErrors[key] = issue.message;
+        }
 
-      for (const issue of validatedFields.error.issues) {
-        const key = issue.path?.join(".") || "unknown_field";
-        fieldErrors[key] = issue.message;
+        console.error("Validation errors:", fieldErrors);
+        toast.error("Validation Error", {
+          description: Object.values(fieldErrors).flat()[0] ?? "Unknown error",
+        });
+        return;
       }
 
-      console.error("Validation errors:", fieldErrors);
-      toast.error("Validation Error", {
-        description: Object.values(fieldErrors).flat()[0] ?? "Unknown error",
-      });
-      return;
-    }
-
-    try {
       setLoading(true);
 
       toast.info("Uploading PDF...", {
@@ -171,7 +170,7 @@ export default function UploadForm() {
           description: "Hang tight! We are saving your summary! ✨",
         });
       }
-      formRef.current?.reset();
+
       // e.currentTarget.reset();
     } catch (err) {
       console.error("Upload error:", err);
@@ -180,11 +179,16 @@ export default function UploadForm() {
       });
     } finally {
       setLoading(false);
+      formRef.current?.reset();
     }
   };
   return (
     <div className="flex flex-col gap-8 w-full max-w-2xl mx-auto">
-      <UploadFormInput ref={formRef} onSubmit={handleSubmit}></UploadFormInput>
+      <UploadFormInput
+        loading={loading}
+        ref={formRef}
+        onSubmit={handleSubmit}
+      ></UploadFormInput>
       {/* {Object.values(errors).length > 0 && (
         <div className="text-red-600">
           {Object.entries(errors).map(([field, message]) => (
