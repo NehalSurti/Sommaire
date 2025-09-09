@@ -15,14 +15,12 @@ export async function generateSummaryFromGemini(pdfText: string) {
             config: {
                 systemInstruction: SUMMARY_SYSTEM_PROMPT,
                 temperature: 0.7,
+                maxOutputTokens: 1500
             },
         });
-        console.log("generated text : ", response.text);
         return response.text;
     } catch (error) {
         console.error("Gemini Error : ", error);
         return null;
     }
-
-
 }

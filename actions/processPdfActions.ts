@@ -4,65 +4,82 @@ import { generateSummaryFromGemini } from "@/lib/geminiai";
 import { fetchAndExtractPdfText } from "@/lib/langchain";
 import { auth } from '@clerk/nextjs/server'
 
-export async function generatePdfSummary(uploadResponse: Array<{
+type UploadResponse = Array<{
     serverData: {
         userId: string;
         file: {
             url: string;
             name: string;
-        }
-    }
-}>) {
+        };
+    };
+}>;
 
-    const { userId: user_ID } = await auth();
-    if (!user_ID) {
-        throw new Error("AUTHENTICATION_ERROR: Not Authenticated");
-    }
+interface SummaryResult {
+    success: boolean;
+    data: string | null;
+    error?: string;
+}
 
-    if (!uploadResponse) {
-        return {
-            success: false,
-            error: "File upload failed",
-            data: null
-        }
-    }
-
-    const { serverData: {
-        userId, file: { url: pdfUrl, name: fileName }
-    } } = uploadResponse[0];
-
-    if (!pdfUrl) {
-        return {
-            success: false,
-            error: "File upload failed",
-            data: null
-        }
-    }
+export async function generatePdfSummary(uploadResponse: UploadResponse): Promise<SummaryResult> {
 
     try {
+
+        // Ensure authentication
+        const { userId: user_ID } = await auth();
+        if (!user_ID) {
+            throw new Error("AUTHENTICATION_ERROR: Not Authenticated");
+        }
+
+        // Validate input
+        if (!uploadResponse?.length) {
+            return {
+                success: false,
+                error: "No file uploaded",
+                data: null
+            }
+        }
+
+        const { serverData: {
+            userId, file: { url: pdfUrl, name: fileName }
+        } } = uploadResponse[0];
+
+        if (!pdfUrl) {
+            return {
+                success: false,
+                error: "Invalid file URL",
+                data: null
+            }
+        }
+
+        // Extract text from PDF
         const pdfText = await fetchAndExtractPdfText(pdfUrl);
 
         if (!pdfText.success || !pdfText.data) {
-            throw new Error(pdfText.error);
+            throw new Error(pdfText.error || "Failed to extract text from PDF");
         }
-        console.log("pdfText : ", pdfText.data);
 
-        let summary;
+        // Generate summary        
         try {
-            summary = await generateSummaryFromGemini(pdfText.data);
+            const summary = await generateSummaryFromGemini(pdfText.data);
+
+            if (!summary) {
+                throw new Error("Gemini API Error");
+            }
+            return {
+                success: true,
+                data: summary
+            }
         } catch (geminiError) {
             console.error("Gemini API failed", geminiError);
-            throw new Error("Failed to generate summary with available AI Provider");
+            throw new Error("AI summarization failed");
         }
 
     } catch (error) {
         console.error("Error uploading file:", error);
         return {
             success: false,
-            error: "File upload failed",
+            error: (error as Error).message,
             data: null
         }
     }
-
-
 }
