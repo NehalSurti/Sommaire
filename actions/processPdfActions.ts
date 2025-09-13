@@ -5,52 +5,38 @@ import { fetchAndExtractPdfText } from "@/lib/langchain";
 import { auth } from '@clerk/nextjs/server'
 import prisma from "@/lib/prisma";
 import type { PdfSummary } from "@/app/generated/prisma";
+import { z } from "zod";
+import { sanitizePdfSummaryInput, sanitizeUploadResponse } from "@/utils/sanitizeInput";
+import { CreatePdfSummaryInput, CreatePdfSummarySchema, UploadResponse, UploadResponseSchema } from "@/utils/validateInput";
+import { revalidatePath } from "next/cache";
 
-type UploadResponse = Array<{
-    serverData: {
-        userId: string;
-        file: {
-            url: string;
-            name: string;
-        };
-    };
-}>;
+
 
 interface SummaryResult {
     success: boolean;
-    data: string | null;
+    data: {
+        title: string;
+        summary: string
+    } | null;
     error?: string;
 }
 
 export async function generatePdfSummary(uploadResponse: UploadResponse): Promise<SummaryResult> {
 
     try {
+        // Validate input using Zod
+        const parsed = UploadResponseSchema.parse(uploadResponse);
+
+        //Sanitize input
+        const safeUpload = sanitizeUploadResponse(parsed)[0];
+
+        const { serverData: { userId, file: { url: pdfUrl, name: fileName } } } = safeUpload;
 
         // Ensure authentication
         const { userId: user_ID } = await auth();
-        if (!user_ID) {
+
+        if (!user_ID || user_ID !== userId) {
             throw new Error("AUTHENTICATION_ERROR: Not Authenticated");
-        }
-
-        // Validate input
-        if (!uploadResponse?.length) {
-            return {
-                success: false,
-                error: "No file uploaded",
-                data: null
-            }
-        }
-
-        const { serverData: {
-            userId, file: { url: pdfUrl, name: fileName }
-        } } = uploadResponse[0];
-
-        if (!pdfUrl) {
-            return {
-                success: false,
-                error: "Invalid file URL",
-                data: null
-            }
         }
 
         // Extract text from PDF
@@ -67,9 +53,10 @@ export async function generatePdfSummary(uploadResponse: UploadResponse): Promis
             if (!summary) {
                 throw new Error("Gemini API Error");
             }
+
             return {
                 success: true,
-                data: summary
+                data: { title: fileName, summary }
             }
         } catch (geminiError) {
             console.error("Gemini API failed", geminiError);
@@ -77,6 +64,13 @@ export async function generatePdfSummary(uploadResponse: UploadResponse): Promis
         }
 
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            return {
+                success: false,
+                error: "Validation failed",
+                data: null
+            };
+        }
         console.error("Error uploading file:", error);
         return {
             success: false,
@@ -86,13 +80,8 @@ export async function generatePdfSummary(uploadResponse: UploadResponse): Promis
     }
 }
 
-interface CreatePdfSummaryInput {
-    userId: string;
-    originalFileUrl: string;
-    summaryText: string;
-    title?: string;
-    fileName?: string;
-}
+
+
 
 interface CreatePdfSummaryResult {
     success: boolean;
@@ -102,26 +91,40 @@ interface CreatePdfSummaryResult {
 
 export async function storePdfSummaryAction(data: CreatePdfSummaryInput): Promise<CreatePdfSummaryResult> {
     try {
+        // Validate input
+        const parsed = CreatePdfSummarySchema.parse(data);
+
+        // Sanitize input
+        const safeData = sanitizePdfSummaryInput(parsed);
+
         // Ensure authentication
         const { userId: user_ID } = await auth();
-        if (!user_ID) {
+        if (!user_ID || user_ID !== safeData.userId) {
             throw new Error("AUTHENTICATION_ERROR: Not Authenticated");
         }
 
         const pdfSummary = await prisma.pdfSummary.create({
             data: {
-                userId: data.userId,
-                originalFileUrl: data.originalFileUrl,
-                summaryText: data.summaryText,
-                title: data.title,
-                fileName: data.fileName,
+                userId: safeData.userId,
+                originalFileUrl: safeData.originalFileUrl,
+                summaryText: safeData.summaryText,
+                title: safeData.title ?? null,
+                fileName: safeData.fileName ?? null,
                 // status defaults to "completed"
             },
         });
 
+        // revalidatePath(`/summaries/${pdfSummary.id}`);
+
         return { success: true, data: pdfSummary };
 
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            return {
+                success: false,
+                error: "Validation failed",
+            };
+        }
         console.error("Error saving PDF summary:", error);
         return {
             success: false,

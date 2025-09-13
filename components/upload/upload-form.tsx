@@ -173,25 +173,35 @@ export default function UploadForm() {
           description: "Hang tight! We are saving your summary! ✨",
         });
 
-        const res = await storePdfSummaryAction({
+        const storeResult = await storePdfSummaryAction({
           userId: userId,
           originalFileUrl: downloadUrl,
-          summaryText: data,
-          title: "My PDF Summary",
+          summaryText: data.summary,
+          title: data.title,
           fileName: fileKey,
         });
-        console.log("Save Summary Response : ", res);
-      }
 
-      // e.currentTarget.reset();
+        if (!storeResult.success || !storeResult.data) {
+          console.error("Summary saving error:", storeResult);
+          toast.error("Summary saving error");
+          return;
+        }
+
+        toast.success("✨ Summary Generated!", {
+          description: "Your PDF has been successfully summarized and saved!",
+        });
+
+        formRef.current?.reset();
+        redirect(`/summaries/${storeResult.data.id}`);
+      }
     } catch (err) {
       console.error("Upload error:", err);
       toast.error("Upload Error", {
         description: "An error occurred while uploading. Please try again.",
       });
+      formRef.current?.reset();
     } finally {
       setLoading(false);
-      formRef.current?.reset();
     }
   };
   return (
