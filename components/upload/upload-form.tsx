@@ -5,7 +5,10 @@ import UploadFormInput from "./upload-form-input";
 import { z } from "zod";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { generatePdfSummary } from "@/actions/processPdfActions";
+import {
+  generatePdfSummary,
+  storePdfSummaryAction,
+} from "@/actions/processPdfActions";
 import { useAuth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
@@ -169,6 +172,15 @@ export default function UploadForm() {
         toast.info("📄 Saving PDF...", {
           description: "Hang tight! We are saving your summary! ✨",
         });
+
+        const res = await storePdfSummaryAction({
+          userId: userId,
+          originalFileUrl: downloadUrl,
+          summaryText: data,
+          title: "My PDF Summary",
+          fileName: fileKey,
+        });
+        console.log("Save Summary Response : ", res);
       }
 
       // e.currentTarget.reset();

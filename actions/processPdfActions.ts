@@ -3,6 +3,8 @@
 import { generateSummaryFromGemini } from "@/lib/geminiai";
 import { fetchAndExtractPdfText } from "@/lib/langchain";
 import { auth } from '@clerk/nextjs/server'
+import prisma from "@/lib/prisma";
+import type { PdfSummary } from "@/app/generated/prisma";
 
 type UploadResponse = Array<{
     serverData: {
@@ -80,6 +82,50 @@ export async function generatePdfSummary(uploadResponse: UploadResponse): Promis
             success: false,
             error: (error as Error).message,
             data: null
+        }
+    }
+}
+
+interface CreatePdfSummaryInput {
+    userId: string;
+    originalFileUrl: string;
+    summaryText: string;
+    title?: string;
+    fileName?: string;
+}
+
+interface CreatePdfSummaryResult {
+    success: boolean;
+    data?: PdfSummary;
+    error?: string;
+}
+
+export async function storePdfSummaryAction(data: CreatePdfSummaryInput): Promise<CreatePdfSummaryResult> {
+    try {
+        // Ensure authentication
+        const { userId: user_ID } = await auth();
+        if (!user_ID) {
+            throw new Error("AUTHENTICATION_ERROR: Not Authenticated");
+        }
+
+        const pdfSummary = await prisma.pdfSummary.create({
+            data: {
+                userId: data.userId,
+                originalFileUrl: data.originalFileUrl,
+                summaryText: data.summaryText,
+                title: data.title,
+                fileName: data.fileName,
+                // status defaults to "completed"
+            },
+        });
+
+        return { success: true, data: pdfSummary };
+
+    } catch (error) {
+        console.error("Error saving PDF summary:", error);
+        return {
+            success: false,
+            error: (error as Error).message || "Error saving PDF summary",
         }
     }
 }
