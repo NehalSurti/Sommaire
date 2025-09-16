@@ -1,10 +1,21 @@
 import BgGradient from "@/components/common/Bg-Gradient";
+import SummaryCard from "@/components/summaries/summary-card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
 export default function DashboardPage() {
+  const uploadLimit = 5;
+  const summaries = [
+    {
+      id: 1,
+      title: "Sous Soul",
+      created_at: "2025-01-30 20:53:10.759642+00",
+      summary_text: "description",
+      status: "completed",
+    },
+  ];
   return (
     <main className="min-h-screen">
       <BgGradient className="from-emerald-200 via-teal-200 to-cyan-200"></BgGradient>
@@ -28,10 +39,26 @@ export default function DashboardPage() {
               </Link>
             </Button>
           </div>
-          <div className="">
-            <p className="text-sm">
-              You've reached the limit of 5 uploads on the basic plan.
-            </p>
+          <div className="mb-6">
+            <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 text-rose-800">
+              <p className="text-sm">
+                You've reached the limit of {uploadLimit} uploads on the basic
+                plan.{" "}
+                <Link
+                  href="/#pricing"
+                  className="text-rose-800 underline font-medium underline-offset-4 inline-flex items-center"
+                >
+                  Click here to upgrade to Pro{" "}
+                  <ArrowRight className="w-4 h-4 inline-block"></ArrowRight>
+                </Link>{" "}
+                for unlimited uploads.
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 sm:px-0">
+            {summaries.map((summary, index) => {
+              return <SummaryCard key={index} summary={summary}></SummaryCard>;
+            })}
           </div>
         </div>
       </div>
