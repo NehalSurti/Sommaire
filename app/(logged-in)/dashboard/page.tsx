@@ -4,9 +4,32 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Plus } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { getUserPdfSummaries } from "@/actions/pdfSummaryActions";
+import { toast } from "sonner";
+import EmptySummaryState from "@/components/summaries/empty-summary-state";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
   const uploadLimit = 5;
+
+  // Ensure authentication
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
+  // const result = await getUserPdfSummaries(userId);
+
+  // if (!result.success || !result.data) {
+  //   console.error("Error fetching user summaries:", result.error);
+  //   toast.error(result.error);
+  //   return;
+  // }
+
+  // const summaries = result.data;
+
   const summaries = [
     {
       id: 1,
@@ -16,6 +39,7 @@ export default function DashboardPage() {
       status: "completed",
     },
   ];
+
   return (
     <main className="min-h-screen">
       <BgGradient className="from-emerald-200 via-teal-200 to-cyan-200"></BgGradient>
@@ -55,11 +79,17 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 sm:px-0">
-            {summaries.map((summary, index) => {
-              return <SummaryCard key={index} summary={summary}></SummaryCard>;
-            })}
-          </div>
+          {summaries.length === 0 ? (
+            <EmptySummaryState></EmptySummaryState>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 sm:px-0">
+              {summaries.map((summary, index) => {
+                return (
+                  <SummaryCard key={index} summary={summary}></SummaryCard>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </main>

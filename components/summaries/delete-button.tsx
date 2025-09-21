@@ -14,13 +14,41 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { deletePdfSummaryById } from "@/actions/pdfSummaryActions";
+import { toast } from "sonner";
 
-export default function DeleteButton() {
+interface DeleteButtonProps {
+  summaryId: string;
+}
+
+export default function DeleteButton({ summaryId }: DeleteButtonProps) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleDelete = () => {
-    // await deletePdfSummaryById(summary.id)
-    setOpen(false);
+  const handleDelete = async () => {
+    if (loading) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const result = await deletePdfSummaryById(summaryId);
+
+      if (!result.success) {
+        console.error("Error deleting summary:", result.error);
+        toast.error("Failed to delete summary. Please try again.");
+        return;
+      }
+      toast.info("Summary deleted", {
+        description: "Your PDF summary has been successfully removed.",
+      });
+    } catch (error) {
+      console.error("Error deleting summary:", error);
+      toast.error("Failed to delete summary. Please try again.");
+    } finally {
+      setLoading(false);
+      setOpen(false);
+    }
   };
 
   return (
@@ -47,6 +75,7 @@ export default function DeleteButton() {
             <Button
               variant="ghost"
               className=" px-2 bg-gray-50 border border-gray-200 hover:text-gray-600 hover:bg-gray-100"
+              disabled={loading}
             >
               Cancel
             </Button>
@@ -55,8 +84,9 @@ export default function DeleteButton() {
             variant="destructive"
             className="bg-gray-900 hover:bg-gray-600"
             onClick={handleDelete}
+            disabled={loading}
           >
-            Delete
+            {loading ? "Deleting..." : "Delete"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -4,6 +4,8 @@ import DeleteButton from "./delete-button";
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatDistanceToNow } from "date-fns";
+import { formatFileName } from "@/utils/formatUtils";
 
 const SummaryHeader = ({
   fileUrl,
@@ -19,9 +21,11 @@ const SummaryHeader = ({
       <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-rose-400 mt-1"></FileText>
       <div className="flex-1 min-w-0">
         <h3 className="text-base xl:text-lg font-semibold text-gray-900 truncate w-4/5">
-          {title}
+          {title || formatFileName(fileUrl)}
         </h3>
-        <p className="text-sm text-gray-500">{createdAt}</p>
+        <p className="text-sm text-gray-500">
+          {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+        </p>
       </div>
     </div>
   );
@@ -47,7 +51,7 @@ export default function SummaryCard({ summary }: { summary: any }) {
     <div>
       <Card className="relative h-full">
         <div className="absolute top-2 right-2">
-          <DeleteButton></DeleteButton>
+          <DeleteButton summaryId={summary.id}></DeleteButton>
         </div>
         <Link href={`summaries/${summary.id}`} className="block p-4 sm:p-6">
           <div className="flex flex-col gap-3 sm:gap-4">
