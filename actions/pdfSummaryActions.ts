@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import type { PdfSummary } from "@/app/generated/prisma";
 import { auth } from '@clerk/nextjs/server'
 import z from "zod";
+import { revalidatePath } from "next/cache";
 
 // Generic action result type
 interface ActionResult<T> {
@@ -113,6 +114,7 @@ export async function deletePdfSummaryById(
 
         await prisma.pdfSummary.delete({ where: { id } });
 
+        // revalidatePath(`/dashboard`);
         return { success: true, data: null };
     } catch (error) {
         console.error("Error deleting summary:", error);
