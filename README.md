@@ -48,12 +48,12 @@ graph TD
     A -- "PDF Upload" --> B
     B -- "File URL" --> C
     C -- "Extracted Text" --> D
-    D -- "Summary" --> G
+    D -- "Summary JSON" --> G
     G -- "Summary Data" --> H
 
     %% === STYLING (GitHub-friendly) ===
-    style FRONTEND fill:#d1fae5,stroke:#10b981,stroke-width:2px,stroke-dasharray:5 5
-    style BACKEND fill:#f3f4f6,stroke:#6b7280,stroke-width:2px,stroke-dasharray:5 5
+    style FRONTEND fill:#A1C2BD,stroke:#10b981,stroke-width:2px,stroke-dasharray:5 5
+    style BACKEND fill:#708993,stroke:#6b7280,stroke-width:2px,stroke-dasharray:5 5
 
     style A fill:#fef3c7,stroke:#f59e0b,stroke-width:2px
     style B fill:#dbeafe,stroke:#2563eb,stroke-width:2px
