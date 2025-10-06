@@ -1,6 +1,6 @@
-# Someware AI
+# Sommaire
 
-A full-stack SaaS that converts long PDFs into beautiful, concise summary reels using OpenAI and Gemini AI.
+A full-stack SaaS that converts long PDFs into beautiful, concise summary reels using Gemini AI.
 
 ## ✨ Features
 
@@ -32,35 +32,35 @@ A full-stack SaaS that converts long PDFs into beautiful, concise summary reels 
 graph TD
     %% === FRONTEND SECTION ===
     subgraph FRONTEND[🌐 Frontend]
-        A[📄 User Uploads PDF]
-        H[📊 Interactive Reel in Dashboard]
+        A[📄 Upload PDF]
+        H[📊 Interactive Reel]
     end
 
     %% === BACKEND SECTION ===
-    subgraph BACKEND[⚙️ Backend Services]
-        B[☁️ AWS S3 - File Storage]
-        C[🧠 LangChain - Extract Text]
-        D[🤖 Gemini API - Summarize]
-        G[🗄️ Neon DB - Save Summary]
+    subgraph BACKEND[⚙️ Backend]
+        B[☁️ S3 Storage]
+        C[🧠 LangChain]
+        D[🤖 Gemini API]
+        G[🗄️ Neon DB]
     end
 
     %% === DATA FLOW ===
     A -- "PDF Upload" --> B
-    B -- "Extracted Text" --> C
-    C -- "Processed Text → Summary Request" --> D
-    D -- "AI Summary" --> G
+    B -- "File URL" --> C
+    C -- "Extracted Text" --> D
+    D -- "Summary" --> G
     G -- "Summary Data" --> H
 
-    %% === STYLING ===
-    style FRONTEND fill:#f0fdf4,stroke:#22c55e,stroke-width:2px,stroke-dasharray: 5 5
-    style BACKEND fill:#f9fafb,stroke:#a3a3a3,stroke-width:2px,stroke-dasharray: 5 5
+    %% === STYLING (GitHub-friendly) ===
+    style FRONTEND fill:#d1fae5,stroke:#10b981,stroke-width:2px,stroke-dasharray:5 5
+    style BACKEND fill:#f3f4f6,stroke:#6b7280,stroke-width:2px,stroke-dasharray:5 5
 
-    style A fill:#fef6e4,stroke:#fbbf24,stroke-width:2px
-    style B fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
-    style C fill:#e0f7f4,stroke:#14b8a6,stroke-width:2px
-    style D fill:#e6f4ea,stroke:#22c55e,stroke-width:2px
-    style G fill:#fef3c7,stroke:#f59e0b,stroke-width:2px
-    style H fill:#ecfccb,stroke:#65a30d,stroke-width:2px
+    style A fill:#fef3c7,stroke:#f59e0b,stroke-width:2px
+    style B fill:#dbeafe,stroke:#2563eb,stroke-width:2px
+    style C fill:#d1fae5,stroke:#10b981,stroke-width:2px
+    style D fill:#dcfce7,stroke:#22c55e,stroke-width:2px
+    style G fill:#fef9c3,stroke:#fbbf24,stroke-width:2px
+    style H fill:#ecfccb,stroke:#84cc16,stroke-width:2px
 ```
 
 
