@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Someware AI
 
-## Getting Started
+A full-stack SaaS that converts long PDFs into beautiful, concise summary reels using OpenAI and Gemini AI.
 
-First, run the development server:
+## ✨ Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- PDF Upload with AWS s3
+- Text Extraction using LangChain
+- AI Summarization via Gemini
+- Authentication and user management (Clerk)
+- Subscription billing with Stripe (Basic & Pro Plans)
+- Reels-style interactive summary viewer
+- Admin dashboard and deletion logic
+- Responsive UI with Tailwind CSS v4 + Framer Motion
+- Deployed on Vercel using Next.js 15 server actions
+
+## 🧱 Tech Stack
+
+| Area         | Tech |
+|--------------|------|
+| Frontend     | Next.js 15, React 19, Tailwind, ShadCN UI |
+| Backend      | Server Actions, Neon DB (PostgreSQL) |
+| Auth         | Clerk |
+| File Uploads | s3 |
+| AI Services  | Gemini AI |
+| Payments     | Stripe |
+| Deployment   | Vercel |
+
+## 🧠 Architecture Overview
+
+```mermaid
+graph TD
+    %% === FRONTEND SECTION ===
+    subgraph FRONTEND[🌐 Frontend]
+        A[📄 User Uploads PDF]
+        H[📊 Interactive Reel in Dashboard]
+    end
+
+    %% === BACKEND SECTION ===
+    subgraph BACKEND[⚙️ Backend Services]
+        B[☁️ AWS S3 - File Storage]
+        C[🧠 LangChain - Extract Text]
+        D[🤖 Gemini API - Summarize]
+        G[🗄️ Neon DB - Save Summary]
+    end
+
+    %% === DATA FLOW ===
+    A -- "PDF Upload" --> B
+    B -- "Extracted Text" --> C
+    C -- "Processed Text → Summary Request" --> D
+    D -- "AI Summary" --> G
+    G -- "Summary Data" --> H
+
+    %% === STYLING ===
+    style FRONTEND fill:#f0fdf4,stroke:#22c55e,stroke-width:2px,stroke-dasharray: 5 5
+    style BACKEND fill:#f9fafb,stroke:#a3a3a3,stroke-width:2px,stroke-dasharray: 5 5
+
+    style A fill:#fef6e4,stroke:#fbbf24,stroke-width:2px
+    style B fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
+    style C fill:#e0f7f4,stroke:#14b8a6,stroke-width:2px
+    style D fill:#e6f4ea,stroke:#22c55e,stroke-width:2px
+    style G fill:#fef3c7,stroke:#f59e0b,stroke-width:2px
+    style H fill:#ecfccb,stroke:#65a30d,stroke-width:2px
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
