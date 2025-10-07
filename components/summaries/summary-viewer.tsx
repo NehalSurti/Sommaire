@@ -1,49 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import NavigationControls from "./navigation-controls";
 import ProgressBar from "./progress-bar";
+import { parseSection } from "@/utils/summary-helpers";
+import ContentSection from "./content-section";
 
-const parseSection = (section: string): { title: string; points: string[] } => {
-  const [title, ...content] = section.split("\n");
-
-  const cleanTitle = title.startsWith("#")
-    ? title.substring(1).trim()
-    : title.trim();
-
-  const points: string[] = [];
-  let currentPoint = "";
-
-  content.forEach((line) => {
-    const trimmedLine = line.trim();
-    if (trimmedLine.startsWith("-") || trimmedLine.startsWith("*")) {
-      if (currentPoint) points.push(currentPoint.trim());
-      currentPoint = trimmedLine;
-    } else if (!trimmedLine) {
-      if (currentPoint) points.push(currentPoint.trim());
-      currentPoint = "";
-    } else {
-      currentPoint += " " + trimmedLine;
-    }
-  });
-
-  if (currentPoint) points.push(currentPoint.trim());
-
-  return {
-    title: cleanTitle,
-    points: points.filter(
-      (point) => point && !point.startsWith("#") && !point.startsWith("[Choose")
-    ),
-  };
+const SectionTitle = ({ title }: { title: string }) => {
+  return (
+    <div className="flex flex-col gap-2 mb-6 sticky top-0 pt-2 pb-4 bg-background/80 backdrop-blur-xs z-10">
+      <h2 className="text-3xl lg:text-4xl font-bold text-center flex items-center justify-center gap-2">
+        {title}
+      </h2>
+    </div>
+  );
 };
 
 export default function SummaryViewer({
@@ -73,12 +44,12 @@ export default function SummaryViewer({
       ></ProgressBar>
       <div className="h-full overflow-y-auto scrollbar-hide pt-12 sm:pt-16 pb-20 sm:pb-24">
         <div className="px-4 sm:px-6">
-          <h2>{sections[currentSection]?.title || ""}</h2>
-          <ul>
-            {sections[currentSection]?.points.map((point, index) => (
-              <li key={index}>{point}</li>
-            ))}
-          </ul>
+          <SectionTitle
+            title={sections[currentSection]?.title || ""}
+          ></SectionTitle>
+          <ContentSection
+            points={sections[currentSection]?.points || []}
+          ></ContentSection>
         </div>
       </div>
 
