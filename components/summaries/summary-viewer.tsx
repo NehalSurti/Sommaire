@@ -47,9 +47,8 @@ export default function SummaryViewer({
           <SectionTitle
             title={sections[currentSection]?.title || ""}
           ></SectionTitle>
-          <ContentSection
-            points={sections[currentSection]?.points || []}
-          ></ContentSection>
+          
+          <ContentSection points={sections[currentSection]?.points || []}></ContentSection>
         </div>
       </div>
 
