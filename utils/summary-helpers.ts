@@ -35,18 +35,33 @@ export const parseSection = (section: string): { title: string; points: string[]
 
 
 export const parseEmojiPoint = (content: string) => {
+    // Remove leading bullet (•) with whitespace
     const cleanContent = content.replace(/^[•]\s*/, '').trim();
 
-    const matches = cleanContent.match(/^(\p{Emoji}+)(.+)$/u);
-    if (!matches) return null;
+    // Match an emoji or emoji sequence followed by text
+    const match = cleanContent.match(
+        /^([\p{Extended_Pictographic}\p{Emoji_Presentation}\p{Emoji}\uFE0F]+)\s*(.+)$/u
+    );
+    if (!match) return null;
 
-    const [_, emoji, text] = matches
+    const [_, emoji, text] = match
     return {
         emoji: emoji.trim(),
         text: text.trim(),
     }
 }
 
-export const EmojiPoint = () => {
+export function parsePoint(point: string) {
+    const trimmed = point.trim();
 
+    const isEmpty = trimmed === "";
+
+    const isNumbered = /^\d+\./.test(trimmed);
+    const isMainPoint = /^•/.test(trimmed);
+    const hasEmoji = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u.test(
+        trimmed
+    );
+
+    return { isNumbered, isMainPoint, hasEmoji, isEmpty };
 }
+
