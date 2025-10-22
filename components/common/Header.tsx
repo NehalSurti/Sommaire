@@ -3,6 +3,7 @@ import { FileText } from "lucide-react";
 import { Button } from "../ui/button";
 import NavLink from "./Nav-Link";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import PlanBadge from "./plan-badge";
 
 export default function Header() {
   return (
@@ -26,7 +27,7 @@ export default function Header() {
         <SignedIn>
           <div className="flex gap-2 items-center">
             <NavLink href="/upload">Upload a PDF</NavLink>
-            <div>Pro</div>
+            <PlanBadge></PlanBadge>
             <SignedIn>
               <UserButton />
             </SignedIn>
