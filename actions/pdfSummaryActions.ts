@@ -125,3 +125,48 @@ export async function deletePdfSummaryById(
         };
     }
 }
+
+
+/**
+ * Get total number of PDF summaries uploaded by a user
+ */
+export async function getUserPdfSummaryCount(
+    userId: string
+): Promise<ActionResult<number>> {
+    try {
+        // Validate userId
+        UserIdSchema.parse(userId);
+
+        // Ensure authentication
+        const { userId: user_ID } = await auth();
+
+        if (!user_ID || user_ID !== userId) {
+            throw new Error("AUTHENTICATION_ERROR: Not Authenticated");
+        }
+
+        const count = await prisma.pdfSummary.count({
+            where: { userId },
+        });
+
+        return {
+            success: true,
+            data: count,
+        };
+    } catch (error) {
+        console.error("Error fetching PDF summary count:", error);
+
+        if (error instanceof z.ZodError) {
+            return {
+                success: false,
+                data: null,
+                error: "Invalid user ID format",
+            };
+        }
+
+        return {
+            success: false,
+            data: null,
+            error: error instanceof Error ? error.message : "Unknown error",
+        };
+    }
+}
