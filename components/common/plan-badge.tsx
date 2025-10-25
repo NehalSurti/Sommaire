@@ -2,7 +2,7 @@ import React from "react";
 import { currentUser } from "@clerk/nextjs/server";
 import { getUserByEmail } from "@/actions/userActions";
 import { pricingPlans } from "@/utils/constants";
-import { Badge } from "../ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Crown } from "lucide-react";
 
