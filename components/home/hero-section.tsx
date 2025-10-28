@@ -8,6 +8,7 @@ import {
   MotionH1,
   MotionH2,
   MotionSection,
+  MotionSpan,
 } from "@/components/common/motion-wrapper";
 import { containerVariants, itemVariants } from "@/utils/constants";
 
@@ -18,7 +19,7 @@ const buttonVariants = {
     stiffness: 300,
     damping: 10,
   },
-};
+} as const;
 
 export default function HeroSection() {
   return (
@@ -44,7 +45,12 @@ export default function HeroSection() {
       <MotionH1 variants={itemVariants} className="font-bold py-6 text-center">
         Transform PDFs into
         <span className="relative inline-block">
-          <span className="relative z-10 px-2">concise</span>
+          <MotionSpan
+            whileHover={buttonVariants}
+            className="relative z-10 px-2"
+          >
+            concise
+          </MotionSpan>
           <span className="absolute inset-0 bg-rose-200/50 -rotate-2 rounded-lg transform -skew-y-1"></span>
         </span>
         summaries
