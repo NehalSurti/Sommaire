@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { z } from "zod";
 import type { User } from "@/app/generated/prisma";
+import { currentUser } from "@clerk/nextjs/server";
 
 interface ActionResult<T> {
     success: boolean;
@@ -189,6 +190,77 @@ export async function getUserByEmail(email: string): Promise<ActionResult<User>>
                 success: false,
                 data: null,
                 error: "Invalid email format",
+            };
+        }
+
+        return {
+            success: false,
+            data: null,
+            error: error instanceof Error ? error.message : "Unknown error",
+        };
+    }
+}
+
+
+
+// Schema for optional external input
+const SyncUserSchema = z.object({
+    email: z.string().email(),
+});
+
+export async function syncUserWithDatabase(): Promise<ActionResult<User>> {
+    try {
+        // Get user from Clerk
+        const clerkUser = await currentUser();
+        if (!clerkUser) {
+            return {
+                success: false,
+                data: null,
+                error: "No authenticated Clerk user found.",
+            };
+        }
+
+        // Build and validate data
+        const parsed = SyncUserSchema.parse({
+            email: clerkUser.emailAddresses[0]?.emailAddress,
+        });
+
+        // Check if user already exists
+        let user = await prisma.user.findUnique({
+            where: { email: parsed.email },
+        });
+
+        if (!user) {
+            // create a new user
+            user = await prisma.user.create({
+                data: {
+                    email: parsed.email,
+                },
+            });
+
+            return {
+                success: true,
+                data: user,
+                created: true,
+            };
+        } else {
+            // user exists
+            return {
+                success: true,
+                data: user,
+                created: false,
+            };
+        }
+    } catch (error) {
+        console.error("Error in syncClerkUser:", error);
+
+        if (error instanceof z.ZodError) {
+            return {
+                success: false,
+                data: null,
+                error:
+                    "Validation failed: " +
+                    error.errors.map((e) => e.message).join(", "),
             };
         }
 
