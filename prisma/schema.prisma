@@ -26,9 +26,9 @@ enum PaymentStatus {
 
 model User {
   id         String     @id @default(uuid())
-  email      String     @unique
+  email      String     @unique // Clerk email
   fullName   String?
-  customerId String?    @unique
+  customerId String?    @unique // Stripe customer ID  
   priceId    String?
   status     UserStatus @default(inactive)
   createdAt  DateTime   @default(now())
@@ -59,7 +59,8 @@ model Payment {
   status          PaymentStatus
   stripePaymentId String        @unique
   priceId         String
-  userEmail       String
+  userEmail       String // Clerk email
+  receiptEmail    String? // Stripe checkout/receipt email
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
