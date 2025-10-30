@@ -37,7 +37,7 @@ export default function DemoSection() {
             >
               Watch how Sommaire transforms{" "}
               <span className="bg-linear-to-r from-rose-500 to-rose-700 bg-clip-text text-transparent">
-                this Next.js course PDF{" "}
+                this Global Electric Vehicle PDF{" "}
               </span>
               into an easy-to-read summary!
             </MotionH3>
@@ -45,7 +45,6 @@ export default function DemoSection() {
         </div>
 
         <div className="flex justify-center items-center px-2 sm:px-4 lg:px-6">
-          {/* Summary Viewer */}
           <MotionDiv
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
