@@ -13,7 +13,7 @@ interface ActionResult<T> {
     error?: string;
 }
 
-const UserIdSchema = z.string().uuid();
+const UserIdSchema = z.string();
 
 /**
  * Fetch user PDF Summaries
