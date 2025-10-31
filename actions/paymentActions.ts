@@ -18,6 +18,7 @@ const CreatePaymentSchema = z.object({
     stripePaymentId: z.string().min(1),
     priceId: z.string().min(1),
     userEmail: z.string().email(),
+    receiptEmail: z.string().email(),
 });
 
 // Map Stripe statuses to Prisma enum values
