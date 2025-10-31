@@ -36,9 +36,19 @@ export async function getOrCreateUser(
         });
 
         if (user) {
+            // Update user with only provided fields
+            const updatedUser = await prisma.user.update({
+                where: { email: data.email },
+                data: {
+                    fullName: data.fullName ?? user.fullName,
+                    customerId: data.customerId ?? user.customerId,
+                    priceId: data.priceId ?? user.priceId,
+                    status: data.status ?? user.status,
+                },
+            });
             return {
                 success: true,
-                data: user,
+                data: updatedUser,
                 created: false,
             };
         }
@@ -83,11 +93,11 @@ export async function getOrCreateUser(
 const UpdateUserSchema = z.object({
     // identify user either by email or id (one of them must be provided)
     email: z.string().email().optional(),
-    id: z.string(),
+    id: z.string().optional(),
 
     // updatable fields
     fullName: z.string().optional(),
-    customerId: z.string().optional(),
+    customerId: z.string(),
     priceId: z.string().optional(),
     status: z.enum(["active", "inactive"]),
 });
@@ -102,13 +112,13 @@ export async function updateUser(
         const data = UpdateUserSchema.parse(input);
 
         // Ensure we have at least one identifier
-        if (!data.id) {
-            throw new Error("Missing identifier: provide either user ID");
+        if (!data.customerId) {
+            throw new Error("Missing identifier: provide ID");
         }
 
         // Ensure the user exists,
         const existingUser = await prisma.user.findUnique({
-            where: { customerId: data.id },
+            where: { customerId: data.customerId },
         });
 
         if (!existingUser) {
