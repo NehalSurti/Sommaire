@@ -5,7 +5,6 @@ import { z } from "zod";
 // Zod schema for a single uploaded file
 export const UploadedFileSchema = z.object({
     serverData: z.object({
-        userId: z.string().min(1, "UserId is required"),
         file: z.object({
             url: z.string().url("Invalid file URL"),
             name: z.string().min(1, "File name is required"),
