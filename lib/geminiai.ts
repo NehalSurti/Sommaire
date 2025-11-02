@@ -5,12 +5,10 @@ export async function generateSummaryFromGemini(pdfText: string) {
     try {
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-
-
         const prompt = `${SUMMARY_SYSTEM_PROMPT}\n\nTransform this document into an engaging, easy-to-read summary with contextually relevant emojis and proper markdown formatting:\n\n${pdfText}`;
 
         const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
+            model: "gemini-2.5-flash",
             contents: prompt,
             config: {
                 systemInstruction: SUMMARY_SYSTEM_PROMPT,
@@ -18,6 +16,7 @@ export async function generateSummaryFromGemini(pdfText: string) {
                 maxOutputTokens: 1500
             },
         });
+        console.log("Gemini Response: ", response);
         return response.text;
     } catch (error) {
         console.error("Gemini Error : ", error);
