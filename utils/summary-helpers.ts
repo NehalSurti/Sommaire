@@ -12,7 +12,7 @@ export const parseSection = (section: string): { title: string; points: string[]
 
     content.forEach((line) => {
         const trimmedLine = line.trim();
-        if (trimmedLine.startsWith("-") || trimmedLine.startsWith("*")) {
+        if (trimmedLine.startsWith("-") || trimmedLine.startsWith("•")) {
             if (currentPoint) points.push(currentPoint.trim());
             currentPoint = trimmedLine;
         } else if (!trimmedLine) {
