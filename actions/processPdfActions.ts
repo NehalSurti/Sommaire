@@ -24,20 +24,20 @@ interface SummaryResult {
 export async function generatePdfSummary(uploadResponse: UploadResponse): Promise<SummaryResult> {
 
     try {
+        // Ensure authentication
+        const { userId } = await auth();
+
+        if (!userId) {
+            throw new Error("AUTHENTICATION_ERROR: Not Authenticated");
+        }
+
         // Validate input using Zod
         const parsed = UploadResponseSchema.parse(uploadResponse);
 
         //Sanitize input
         const safeUpload = sanitizeUploadResponse(parsed)[0];
 
-        const { serverData: { userId, file: { url: pdfUrl, name: fileName } } } = safeUpload;
-
-        // Ensure authentication
-        const { userId: user_ID } = await auth();
-
-        if (!user_ID || user_ID !== userId) {
-            throw new Error("AUTHENTICATION_ERROR: Not Authenticated");
-        }
+        const { serverData: { file: { url: pdfUrl, name: fileName } } } = safeUpload;
 
         // Extract text from PDF
         const pdfText = await fetchAndExtractPdfText(pdfUrl);
@@ -49,6 +49,7 @@ export async function generatePdfSummary(uploadResponse: UploadResponse): Promis
         // Generate summary        
         try {
             const summary = await generateSummaryFromGemini(pdfText.data);
+            console.log("Generated Summary: ", summary);
 
             if (!summary) {
                 throw new Error("Gemini API Error");
@@ -91,17 +92,18 @@ interface CreatePdfSummaryResult {
 
 export async function storePdfSummaryAction(data: CreatePdfSummaryInput): Promise<CreatePdfSummaryResult> {
     try {
+
+        // Ensure authentication
+        const { userId: user_ID } = await auth();
+        if (!user_ID) {
+            throw new Error("AUTHENTICATION_ERROR: Not Authenticated");
+        }
+
         // Validate input
         const parsed = CreatePdfSummarySchema.parse(data);
 
         // Sanitize input
         const safeData = sanitizePdfSummaryInput(parsed);
-
-        // Ensure authentication
-        const { userId: user_ID } = await auth();
-        if (!user_ID || user_ID !== safeData.userId) {
-            throw new Error("AUTHENTICATION_ERROR: Not Authenticated");
-        }
 
         const pdfSummary = await prisma.pdfSummary.create({
             data: {
@@ -114,7 +116,7 @@ export async function storePdfSummaryAction(data: CreatePdfSummaryInput): Promis
             },
         });
 
-        // revalidatePath(`/summaries/${pdfSummary.id}`);
+        // revalidatePath(`/summaries/${pdfSummary.id}`); //TODO: Uncomment if needed
 
         return { success: true, data: pdfSummary };
 
