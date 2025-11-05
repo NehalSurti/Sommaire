@@ -21,16 +21,14 @@ const UserIdSchema = z.string();
 
 export async function getUserPdfSummaries(userId: string): Promise<ActionResult<PdfSummary[]>> {
     try {
+        // Ensure authentication
+        const { userId: user_ID } = await auth();
+        if (!user_ID) {
+            throw new Error("AUTHENTICATION_ERROR: Not Authenticated");
+        }
 
         // Validate input
         UserIdSchema.parse(userId);
-
-        // Ensure authentication
-        const { userId: user_ID } = await auth();
-
-        if (!user_ID || user_ID !== userId) {
-            throw new Error("AUTHENTICATION_ERROR: Not Authenticated");
-        }
 
         const userPdfSummaries = await prisma.pdfSummary.findMany({
             where: { userId },
@@ -75,7 +73,7 @@ export async function getPdfSummaryById(
             where: { id },
         });
 
-        if (!summary || summary.userId !== userId) {
+        if (!summary) {
             throw new Error("NOT_FOUND: Summary not found or access denied");
         }
 
@@ -108,13 +106,13 @@ export async function deletePdfSummaryById(
         // Ensure the summary exists and belongs to the user
         const summary = await prisma.pdfSummary.findUnique({ where: { id } });
 
-        if (!summary || summary.userId !== userId) {
-            throw new Error("NOT_FOUND: Summary not found or access denied");
+        if (!summary) {
+            throw new Error("NOT_FOUND: Summary not found");
         }
 
         await prisma.pdfSummary.delete({ where: { id } });
 
-        // revalidatePath(`/dashboard`);
+        revalidatePath(`/dashboard`);
         return { success: true, data: null };
     } catch (error) {
         console.error("Error deleting summary:", error);
@@ -134,15 +132,15 @@ export async function getUserPdfSummaryCount(
     userId: string
 ): Promise<ActionResult<number>> {
     try {
-        // Validate userId
-        UserIdSchema.parse(userId);
-
         // Ensure authentication
         const { userId: user_ID } = await auth();
 
-        if (!user_ID || user_ID !== userId) {
+        if (!user_ID) {
             throw new Error("AUTHENTICATION_ERROR: Not Authenticated");
         }
+
+        // Validate userId
+        UserIdSchema.parse(userId);
 
         const count = await prisma.pdfSummary.count({
             where: { userId },

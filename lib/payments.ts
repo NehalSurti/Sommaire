@@ -1,6 +1,7 @@
 import { createPayment } from "@/actions/paymentActions";
 import { getOrCreateUser, updateUser } from "@/actions/userActions";
 import Stripe from "stripe";
+import { currentUser } from "@clerk/nextjs/server";
 
 interface CheckoutSessionHandlerParams {
     session: Stripe.Checkout.Session;
@@ -33,7 +34,7 @@ export async function handleCheckoutSessionCompleted({ session, stripe }: Checko
 
             const { amount_total, id, status } = session
 
-            const userEmail = session.customer_details?.email;
+            const receiptEmail = session.customer_details?.email;
 
             const paymentResponse = await createPayment({
                 userId: userResponse.data!.id,
@@ -41,7 +42,8 @@ export async function handleCheckoutSessionCompleted({ session, stripe }: Checko
                 status: status as Stripe.Checkout.Session.Status,
                 amount: amount_total as number,
                 stripePaymentId: id,
-                userEmail: userEmail as string,
+                userEmail: email as string,
+                receiptEmail: receiptEmail as string,
             })
 
             if (!paymentResponse.success) {
@@ -75,7 +77,7 @@ export async function handleSubscriptionDeleted({ subscriptionID, stripe }: Subs
         const customerId = subscription.customer as string;
 
         const updateuserResponse = await updateUser({
-            id: customerId,
+            customerId: customerId,
             status: "inactive",
         });
 

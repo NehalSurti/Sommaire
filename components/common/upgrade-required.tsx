@@ -7,7 +7,7 @@ import Link from "next/link";
 export default function UpgradeRequired() {
   return (
     <div className="relative min-h-[50vh]">
-      <BgGradient className="from-rose-100 via-rose-50 to-white"></BgGradient>
+      <BgGradient className="from-rose-400 via-rose-300 to-orange-200"></BgGradient>
       <div className="container px-8 py-16">
         <div className="flex flex-col items-center justify-center gap-8 text-center max-w-2xl mx-auto">
           <div className="flex items-center gap-2 text-rose-500">
@@ -17,8 +17,10 @@ export default function UpgradeRequired() {
             </span>
           </div>
 
-          <h1>Subscription Required</h1>
-          <p>
+          <h1 className="text-4xl font-bold tracking-tight bg-linear-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+            Subscription Required
+          </h1>
+          <p className="text-lg leading-8 text-gray-600 border-2 border-rose-200 bg-white/50 backdrop-blur-xs rounded-lg p-6 border-dashed max-w-xl">
             You need to upgrade to a Basic Plan or the Pro Plan to access this
             feature💖.
           </p>

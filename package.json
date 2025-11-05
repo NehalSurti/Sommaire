@@ -21,6 +21,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "he": "^1.2.0",
     "langchain": "^0.3.31",
     "lucide-react": "^0.534.0",
     "motion": "^12.23.24",
@@ -33,11 +34,13 @@
     "sonner": "^2.0.7",
     "stripe": "^19.1.0",
     "tailwind-merge": "^3.3.1",
+    "tailwind-scrollbar-hide": "^4.0.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4.1.11",
+    "@types/he": "^1.2.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
