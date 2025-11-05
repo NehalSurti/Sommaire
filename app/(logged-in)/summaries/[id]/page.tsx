@@ -1,3 +1,7 @@
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const dynamicParams = true;
+
 import { getPdfSummaryById } from "@/actions/pdfSummaryActions";
 import { Metadata } from "next";
 import React from "react";
@@ -8,8 +12,6 @@ import SourceInfo from "@/components/summaries/source-info";
 import { FileText } from "lucide-react";
 import SummaryViewer from "@/components/summaries/summary-viewer";
 import { MotionDiv } from "@/components/common/motion-wrapper";
-
-export const dynamic = "force-dynamic";
 
 // Metadata generation
 export async function generateMetadata(props: {
