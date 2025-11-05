@@ -1,7 +1,7 @@
 import { getPdfSummaryById } from "@/actions/pdfSummaryActions";
 import { Metadata } from "next";
 import React from "react";
-import { notFound} from "next/navigation";
+import { notFound } from "next/navigation";
 import BgGradient from "@/components/common/Bg-Gradient";
 import SummaryHeader from "@/components/summaries/summary-header";
 import SourceInfo from "@/components/summaries/source-info";
@@ -9,16 +9,12 @@ import { FileText } from "lucide-react";
 import SummaryViewer from "@/components/summaries/summary-viewer";
 import { MotionDiv } from "@/components/common/motion-wrapper";
 
-interface SummaryPageProps {
-  params: {
-    id: string;
-  };
-}
-
 // Metadata generation for SEO
 export async function generateMetadata({
   params,
-}: SummaryPageProps): Promise<Metadata> {
+}: {
+  params: { [key: string]: string };
+}) {
   return {
     title: `Summary: ${params.id}`,
   };
@@ -32,7 +28,11 @@ function countWords(summaryText: string) {
   return summaryText.trim() === "" ? 0 : words.length;
 }
 
-export default async function SummaryPage({ params }: SummaryPageProps) {
+export default async function SummaryPage({
+  params,
+}: {
+  params: { [key: string]: string };
+}) {
   const { id } = params;
 
   const result = await getPdfSummaryById(id);
