@@ -21,8 +21,10 @@ export default async function Layout({
       "Error fetching subscription status:",
       hasActiveSubscription.error
     );
-    return <UpgradeRequired></UpgradeRequired>;
+  } else {
+    if (hasActiveSubscription.data.status !== "active") {
+      return <UpgradeRequired></UpgradeRequired>;
+    }
   }
-return <UpgradeRequired></UpgradeRequired>;
   return <>{children}</>;
 }
