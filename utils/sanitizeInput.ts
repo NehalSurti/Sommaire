@@ -30,7 +30,6 @@ export function sanitizeUrl(url: string): string {
 export function sanitizeUploadResponse(uploadResponse: UploadResponse): UploadResponse {
     return uploadResponse.map((item) => ({
         serverData: {
-            userId: cleanText(item.serverData.userId),
             file: {
                 url: sanitizeUrl(item.serverData.file.url),
                 name: sanitizeFileName(item.serverData.file.name),
