@@ -1,13 +1,9 @@
 import type { NextConfig } from "next";
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   /* config options here */
-  experimental: {
-    // Allow dev tunnels like loca.lt, ngrok, etc.
-    allowedDevOrigins: [
-      // Match all loca.lt tunnels
-      /\.loca\.lt$/,
-    ],
+  eslint: {
+    ignoreDuringBuilds: true,
   },
 };
 

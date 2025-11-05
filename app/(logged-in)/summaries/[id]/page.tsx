@@ -1,7 +1,7 @@
 import { getPdfSummaryById } from "@/actions/pdfSummaryActions";
 import { Metadata } from "next";
 import React from "react";
-import { notFound, redirect } from "next/navigation";
+import { notFound} from "next/navigation";
 import BgGradient from "@/components/common/Bg-Gradient";
 import SummaryHeader from "@/components/summaries/summary-header";
 import SourceInfo from "@/components/summaries/source-info";
@@ -33,7 +33,7 @@ function countWords(summaryText: string) {
 }
 
 export default async function SummaryPage({ params }: SummaryPageProps) {
-  const { id } = await params;
+  const { id } = params;
 
   const result = await getPdfSummaryById(id);
 
