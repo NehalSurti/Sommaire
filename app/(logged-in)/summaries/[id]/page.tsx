@@ -9,6 +9,8 @@ import { FileText } from "lucide-react";
 import SummaryViewer from "@/components/summaries/summary-viewer";
 import { MotionDiv } from "@/components/common/motion-wrapper";
 
+export const dynamic = "force-dynamic";
+
 // Metadata generation
 export async function generateMetadata(props: {
   params: Promise<{ id: string }>;
