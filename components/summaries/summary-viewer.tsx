@@ -7,10 +7,11 @@ import ProgressBar from "./progress-bar";
 import { parseSection } from "@/utils/summary-helpers";
 import ContentSection from "./content-section";
 import { MotionDiv } from "@/components/common/motion-wrapper";
+import { decodeHTML } from "@/utils/decodeHTML";
 
 const SectionTitle = ({ title }: { title: string }) => {
   return (
-    <div className="flex flex-col gap-2 mb-6 sticky top-0 pt-2 pb-4 bg-background/80 backdrop-blur-xs z-10">
+    <div className="flex flex-col gap-2 mb-6 sticky top-0 pt-2 pb-4 bg-background/80 backdrop-blur-xs z-50">
       <h2 className="text-3xl lg:text-4xl font-bold text-center flex items-center justify-center gap-2">
         {title}
       </h2>
@@ -49,11 +50,12 @@ export default function SummaryViewer({
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
         exit={{ opacity: 0 }}
-        className="h-full overflow-y-auto scrollbar-hide pt-12 sm:pt-16 pb-20 sm:pb-24"
+        className="h-full overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-12 sm:pt-16 pb-20 sm:pb-24"
       >
+        <div className="fixed top-0 left-0 right-0 lg:bottom-[600px] sm:bottom-[425px] bg-background/80 backdrop-blur-xs z-40"></div>
         <div className="px-4 sm:px-6">
           <SectionTitle
-            title={sections[currentSection]?.title || ""}
+            title={decodeHTML(sections[currentSection]?.title) || ""}
           ></SectionTitle>
 
           <ContentSection

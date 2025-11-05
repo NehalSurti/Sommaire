@@ -6,6 +6,9 @@ import { FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { formatFileName } from "@/utils/formatUtils";
+import type { PdfSummary } from "@/app/generated/prisma";
+import { MotionDiv } from "../common/motion-wrapper";
+import { itemVariants } from "@/utils/constants";
 
 const SummaryHeader = ({
   fileUrl,
@@ -46,9 +49,15 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-export default function SummaryCard({ summary }: { summary: any }) {
+export default function SummaryCard({ summary }: { summary: PdfSummary }) {
   return (
-    <div>
+    <MotionDiv
+      variants={itemVariants}
+      whileHover={{
+        scale: 1.02,
+        transition: { duration: 0.2, ease: "easeOut" },
+      }}
+    >
       <Card className="relative h-full">
         <div className="absolute top-2 right-2">
           <DeleteButton summaryId={summary.id}></DeleteButton>
@@ -56,12 +65,12 @@ export default function SummaryCard({ summary }: { summary: any }) {
         <Link href={`summaries/${summary.id}`} className="block p-4 sm:p-6">
           <div className="flex flex-col gap-3 sm:gap-4">
             <SummaryHeader
-              title={summary.title}
-              createdAt={summary.created_at}
-              fileUrl={summary.original_file_url}
+              title={summary.title as string}
+              createdAt={summary.createdAt.toString()}
+              fileUrl={summary.originalFileUrl}
             ></SummaryHeader>
             <p className="text-gray-600 line-clamp-2 text-sm sm:text-base pl-2">
-              {summary.summary_text}
+              {summary.summaryText}
             </p>
 
             <div className="flex justify-between items-center mt-2 sm:mt-4">
@@ -70,6 +79,6 @@ export default function SummaryCard({ summary }: { summary: any }) {
           </div>
         </Link>
       </Card>
-    </div>
+    </MotionDiv>
   );
 }

@@ -14,7 +14,7 @@ export default function SummaryHeader({
   readingTime: number;
 }) {
   return (
-    <div className="flex gap-4 mb-4 justify-between">
+    <div className="flex gap-4 mb-4 justify-between w-full">
       <div className="space-y-6">
         <div className="flex flex-wrap items-center gap-4">
           <Badge
@@ -38,7 +38,7 @@ export default function SummaryHeader({
             {readingTime} min read
           </div>
         </div>
-        <h1 className="text-2xl lg:text-4xl font-bold lg:tracking-tight">
+        <h1 className="text-2xl lg:text-4xl font-bold lg:tracking-tight truncate w-100">
           <span className="bg-linear-to-r from-rose-600 to-orange-600 bg-clip-text text-transparent">
             {title}
           </span>

@@ -39,15 +39,15 @@ export default function DeleteButton({ summaryId }: DeleteButtonProps) {
         toast.error("Failed to delete summary. Please try again.");
         return;
       }
-      toast.info("Summary deleted", {
+      toast.success("Summary deleted successfully.", {
         description: "Your PDF summary has been successfully removed.",
       });
+      setOpen(false);
     } catch (error) {
       console.error("Error deleting summary:", error);
-      toast.error("Failed to delete summary. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
-      setOpen(false);
     }
   };
 
