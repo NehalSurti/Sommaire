@@ -30,9 +30,9 @@ export default function Loading() {
               </MotionH1>
 
               {/* Subtitle Skeleton */}
-              <MotionP variants={itemVariants}>
+              <MotionDiv variants={itemVariants}>
                 <Skeleton className="h-5 w-72 sm:w-96 rounded-md" />
-              </MotionP>
+              </MotionDiv>
             </div>
 
             {/* Button Skeleton */}
