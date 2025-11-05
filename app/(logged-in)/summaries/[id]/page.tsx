@@ -9,14 +9,13 @@ import { FileText } from "lucide-react";
 import SummaryViewer from "@/components/summaries/summary-viewer";
 import { MotionDiv } from "@/components/common/motion-wrapper";
 
-// Metadata generation for SEO
-export async function generateMetadata({
-  params,
-}: {
-  params: { [key: string]: string };
-}) {
+// Metadata generation
+export async function generateMetadata(props: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await props.params;
   return {
-    title: `Summary: ${params.id}`,
+    title: `Summary: ${id}`,
   };
 }
 
@@ -28,12 +27,10 @@ function countWords(summaryText: string) {
   return summaryText.trim() === "" ? 0 : words.length;
 }
 
-export default async function SummaryPage({
-  params,
-}: {
-  params: { [key: string]: string };
+export default async function SummaryPage(props: {
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await props.params;
 
   const result = await getPdfSummaryById(id);
 
