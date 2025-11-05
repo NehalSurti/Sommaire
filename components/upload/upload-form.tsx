@@ -9,10 +9,13 @@ import {
   generatePdfSummary,
   storePdfSummaryAction,
 } from "@/actions/processPdfActions";
-import { useAuth } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
+import { getUserByEmail } from "@/actions/userActions";
+import { MotionDiv } from "../common/motion-wrapper";
+import { itemVariants } from "@/utils/constants";
+import LoadingSkeleton from "./loading-skeleton";
 
-// Zod validation schema
+/* ----------------------------- Validation Schema ---------------------------- */
 const inputSchema = z.object({
   file: z
     .instanceof(File, { message: "Invalid File" })
@@ -27,7 +30,7 @@ const inputSchema = z.object({
     }),
 });
 
-// Utility: SHA-256 checksum generator
+/* ------------------- Utility: SHA-256 checksum generator ------------------ */
 async function calculateSHA256(file: File): Promise<string> {
   // Read the file into an ArrayBuffer
   const buffer = await file.arrayBuffer();
@@ -41,25 +44,40 @@ async function calculateSHA256(file: File): Promise<string> {
   return btoa(hashBinary);
 }
 
+/* ---------------------------- Helper Functions ---------------------------- */
+const notify = {
+  info: (title: string, desc?: string) =>
+    toast.info(title, { description: desc }),
+  success: (title: string, desc?: string) =>
+    toast.success(title, { description: desc }),
+  error: (title: string, desc?: string) =>
+    toast.error(title, { description: desc }),
+};
+
+const handleError = (msg: string, err?: unknown) => {
+  console.error(msg, err);
+  notify.error("Error", msg);
+};
+
 export default function UploadForm() {
   const [loading, setLoading] = useState(false);
-  const { isSignedIn, userId } = useAuth();
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  if (!isSignedIn) {
-    redirect("/sign-in");
-  }
+  const { user } = useUser();
+  const email = user?.primaryEmailAddress?.emailAddress;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       if (loading) return; // prevent double submit
+      setErrorMsg(null);
 
       const formData = new FormData(e.currentTarget);
       const file = formData.get("file") as File;
 
+      // Validate file
       const validatedFields = inputSchema.safeParse({ file });
-
       if (!validatedFields.success) {
         let fieldErrors: Record<string, string> = {};
 
@@ -69,19 +87,20 @@ export default function UploadForm() {
         }
 
         console.error("Validation errors:", fieldErrors);
-        toast.error("Validation Error", {
-          description: Object.values(fieldErrors).flat()[0] ?? "Unknown error",
-        });
+        const msg = Object.values(fieldErrors).flat()[0] ?? "Unknown error";
+        notify.error("Validation Error", msg);
+        setErrorMsg(msg);
         return;
       }
 
       setLoading(true);
 
-      toast.info("Uploading PDF...", {
-        description: "We are uploading your PDF!",
-      });
+      const user = await getUserByEmail(email as string);
+      if (!user.success || !user.data) {
+        throw new Error("Failed to fetch user from database.");
+      }
+      notify.info("Uploading PDF...", "We are uploading your file!");
 
-      console.log("Validation:", validatedFields.data);
       const validFile = validatedFields.data.file as File;
       const checksum = await calculateSHA256(validFile);
       const signedURLResult = await getUploadSignedURL(
@@ -91,65 +110,42 @@ export default function UploadForm() {
         checksum
       );
 
-      if (!signedURLResult.success) {
-        console.error("Signed URL error:", signedURLResult);
-        toast.error("Signed URL Error", {
-          description: signedURLResult.error,
-        });
-        return;
+      if (!signedURLResult.success || !signedURLResult.url) {
+        throw new Error(
+          signedURLResult.error ?? "Failed to get signed upload URL."
+        );
       }
 
-      const { url } = signedURLResult;
-
-      if (!url) {
-        console.error("Error: No upload URL returned");
-        toast.error("Error: No upload URL returned");
-        return;
-      }
-
-      const uploadResponse = await fetch(url, {
+      // Upload to S3
+      const uploadResponse = await fetch(signedURLResult.url, {
         method: "PUT",
         body: validFile,
         headers: { "Content-Type": validFile.type },
       });
-
       if (!uploadResponse.ok) {
         throw new Error(`Upload failed with status ${uploadResponse.status}`);
       }
 
-      console.log("s3 uploadResponse response : ", uploadResponse);
-
       const uploadResponseUrl = uploadResponse.url;
       const fileKey = new URL(uploadResponseUrl).pathname.split("/").pop();
+      if (!fileKey) throw new Error("File key extraction failed.");
 
-      if (!fileKey) throw new Error("Failed to extract file key.");
-
-      console.log("fileKey : ", fileKey);
-
+      // Get download URL
       const downloadURLResult = await getDownloadUrl(fileKey);
-
-      console.log("downloadURLResult : ", downloadURLResult);
-
       if (!downloadURLResult.success || !downloadURLResult.url) {
-        console.error("Signed download URL error:", downloadURLResult);
-        toast.error("Signed download URL error", {
-          description: downloadURLResult.error,
-        });
-        return;
+        throw new Error(
+          downloadURLResult.error ?? "Failed to get download URL."
+        );
       }
 
       const downloadUrl = downloadURLResult.url;
 
-      toast.success("PDF uploaded successfully!");
-
-      toast.info("📄 Processing PDF", {
-        description: "Hang tight! Our AI is reading through your document! ✨",
-      });
+      notify.success("Upload Complete", "Your PDF was uploaded successfully!");
+      notify.info("Processing PDF...", "Our AI is summarizing your document.");
 
       const uploadRes = [
         {
           serverData: {
-            userId: userId,
             file: {
               url: downloadUrl,
               name: fileKey,
@@ -158,67 +154,61 @@ export default function UploadForm() {
         },
       ];
 
+      // Generate summary
       const summary = await generatePdfSummary(uploadRes);
 
-      if (!summary || !summary.success) {
-        console.error("Summary generation error:", summary);
-        toast.error("Summary generation error");
-        return;
+      if (!summary?.success || !summary.data) {
+        throw new Error(summary.error ?? "Failed to generate summary.");
       }
 
-      const { data = null } = summary;
+      const summaryData = summary.data;
+      notify.info("Saving Summary...", "Finalizing your summary data.");
 
-      if (data) {
-        toast.info("📄 Saving PDF...", {
-          description: "Hang tight! We are saving your summary! ✨",
-        });
-
-        const storeResult = await storePdfSummaryAction({
-          userId: userId,
-          originalFileUrl: downloadUrl,
-          summaryText: data.summary,
-          title: data.title,
-          fileName: fileKey,
-        });
-
-        if (!storeResult.success || !storeResult.data) {
-          console.error("Summary saving error:", storeResult);
-          toast.error("Summary saving error");
-          return;
-        }
-
-        toast.success("✨ Summary Generated!", {
-          description: "Your PDF has been successfully summarized and saved!",
-        });
-
-        formRef.current?.reset();
-        redirect(`/summaries/${storeResult.data.id}`);
-      }
-    } catch (err) {
-      console.error("Upload error:", err);
-      toast.error("Upload Error", {
-        description: "An error occurred while uploading. Please try again.",
+      // Store summary in DB
+      const storeResult = await storePdfSummaryAction({
+        userId: user.data?.id as string,
+        originalFileUrl: downloadUrl,
+        summaryText: summaryData.summary,
+        title: summaryData.title,
+        fileName: fileKey,
       });
+
+      if (!storeResult.success || !storeResult.data)
+        throw new Error("Failed to save summary.");
+
+      notify.success("Summary Complete!", "Your summary has been saved.");
+
+      formRef.current?.reset();
+
+      window.location.href = `/summaries/${storeResult.data.id}`;
+    } catch (err) {
+      handleError("An error occurred while uploading.", err);
+      setErrorMsg("An error occurred during upload. Please try again.");
       formRef.current?.reset();
     } finally {
       setLoading(false);
     }
   };
   return (
-    <div className="flex flex-col gap-8 w-full max-w-2xl mx-auto">
+    <MotionDiv
+      variants={itemVariants}
+      className="flex flex-col gap-8 w-full max-w-2xl mx-auto"
+    >
       <UploadFormInput
         loading={loading}
         ref={formRef}
         onSubmit={handleSubmit}
       ></UploadFormInput>
-      {/* {Object.values(errors).length > 0 && (
-        <div className="text-red-600">
-          {Object.entries(errors).map(([field, message]) => (
-            <p key={field}>{message}</p>
-          ))}
-        </div>
-      )} */}
-      {loading && <p className="text-gray-500">Uploading...</p>}
-    </div>
+      {/* Inline error message */}
+      {errorMsg && (
+        <p className="text-sm text-red-600 mt-1 font-medium">{errorMsg}</p>
+      )}
+      {loading && (
+        <>
+          <p className="text-gray-500 animate-pulse">Uploading...</p>
+          <LoadingSkeleton></LoadingSkeleton>
+        </>
+      )}
+    </MotionDiv>
   );
 }
