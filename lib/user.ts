@@ -3,6 +3,7 @@ import { getUserByEmail } from "@/actions/userActions";
 import { pricingPlans } from "@/utils/constants";
 import { currentUser } from "@clerk/nextjs/server";
 import type { $Enums } from "@/app/generated/prisma";
+import type { User } from "@/app/generated/prisma";
 
 interface UploadLimitData {
     hasReachedUploadLimit: boolean;
@@ -22,27 +23,19 @@ interface UploadLimitResult {
  * @returns An object containing the upload limit status and metadata.
  */
 
-export const hasReachedUploadLimit = async (userId: string): Promise<UploadLimitResult> => {
+export const hasReachedUploadLimit = async (DbUser: User): Promise<UploadLimitResult> => {
     try {
-        const user = await currentUser();
-
-        if (!user) {
+        const clerkUser = await currentUser();
+        if (!clerkUser) {
             throw new Error("User not authenticated");
         }
 
-        const email = user?.emailAddresses[0]?.emailAddress;
-        if (!email) {
-            throw new Error("User email not found");
-        }
-        const uploadCount = await getUserPdfSummaryCount(userId);
-
+        const uploadCount = await getUserPdfSummaryCount(DbUser.id);
         if (!uploadCount.success || uploadCount.data === null) {
             throw new Error("Could not retrieve upload count");
         }
 
-        const { success, data } = await getUserByEmail(email);
-
-        const priceId = success && data ? data.priceId : null;
+        const { priceId } = DbUser;
         const plan = pricingPlans.find((p) => p.priceId === priceId);
 
         const uploadLimit = plan?.id === "pro" ? 1000 : 5;
@@ -123,3 +116,4 @@ export const getSubscriptionStatus = async (): Promise<SubscriptionStatusResult>
         };
     }
 };
+
