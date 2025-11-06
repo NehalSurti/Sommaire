@@ -9,7 +9,7 @@ export default async function PlanBadge() {
   const user = await currentUser();
   if (!user) return null;
 
-  const hasActiveSubscription = await getSubscriptionStatus();
+  const hasActiveSubscription = await getSubscriptionStatus(user);
 
   if (!hasActiveSubscription.success || !hasActiveSubscription.data)
     return (

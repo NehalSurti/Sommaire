@@ -1,6 +1,6 @@
 import UpgradeRequired from "@/components/common/upgrade-required";
 import { getSubscriptionStatus } from "@/lib/user";
-import { auth } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export default async function Layout({
@@ -8,13 +8,13 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const { userId } = await auth();
+  const user = await currentUser();
 
-  if (!userId) {
+  if (!user) {
     redirect("/sign-in");
   }
 
-  const hasActiveSubscription = await getSubscriptionStatus();
+  const hasActiveSubscription = await getSubscriptionStatus(user);
 
   if (!hasActiveSubscription.success || !hasActiveSubscription.data) {
     console.error(

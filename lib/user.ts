@@ -75,9 +75,8 @@ interface SubscriptionStatusResult {
  * Retrieves the current user's subscription status and plan details.
  * @returns An object containing the user's subscription information.
  */
-export const getSubscriptionStatus = async (): Promise<SubscriptionStatusResult> => {
+export const getSubscriptionStatus = async (user: any): Promise<SubscriptionStatusResult> => {
     try {
-        const user = await currentUser();
         if (!user) {
             throw new Error("User not authenticated");
         }
