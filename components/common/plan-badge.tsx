@@ -11,7 +11,9 @@ export default async function PlanBadge() {
 
   const hasActiveSubscription = await getSubscriptionStatus(user);
 
-  if (!hasActiveSubscription.success || !hasActiveSubscription.data)
+  console.log("Subscription Status:", hasActiveSubscription);
+
+  if (!hasActiveSubscription.success || !hasActiveSubscription.data) {
     return (
       <Badge
         variant="outline"
@@ -26,9 +28,10 @@ export default async function PlanBadge() {
         Buy a plan
       </Badge>
     );
+  }
 
   const priceId = hasActiveSubscription.data.planId;
-  const planName = hasActiveSubscription.data.planName || "Buy a plan";
+  const planName = hasActiveSubscription.data.planName || "No Plan";
 
   return (
     <Badge
