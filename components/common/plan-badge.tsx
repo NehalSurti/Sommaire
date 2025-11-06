@@ -10,7 +10,9 @@ export default async function PlanBadge() {
   const user = await currentUser();
   if (!user) return null;
 
-  const email = user?.emailAddresses[0]?.emailAddress;
+  // const email = user?.emailAddresses[0]?.emailAddress;
+  const email = user?.primaryEmailAddress?.emailAddress;
+
   if (!email)
     return (
       <Badge
