@@ -1,19 +1,17 @@
 import React from "react";
 import { currentUser } from "@clerk/nextjs/server";
-import { getUserByEmail } from "@/actions/userActions";
-import { pricingPlans } from "@/utils/constants";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Crown } from "lucide-react";
+import { getSubscriptionStatus } from "@/lib/user";
 
 export default async function PlanBadge() {
   const user = await currentUser();
   if (!user) return null;
 
-  // const email = user?.emailAddresses[0]?.emailAddress;
-  const email = user?.primaryEmailAddress?.emailAddress;
+  const hasActiveSubscription = await getSubscriptionStatus();
 
-  if (!email)
+  if (!hasActiveSubscription.success || !hasActiveSubscription.data)
     return (
       <Badge
         variant="outline"
@@ -29,11 +27,8 @@ export default async function PlanBadge() {
       </Badge>
     );
 
-  const { success, data } = await getUserByEmail(email);
-  const priceId = success && data ? data.priceId : null;
-
-  const plan = pricingPlans.find((p) => p.priceId === priceId);
-  const planName = plan?.name || "Buy a plan";
+  const priceId = hasActiveSubscription.data.planId;
+  const planName = hasActiveSubscription.data.planName || "Buy a plan";
 
   return (
     <Badge
