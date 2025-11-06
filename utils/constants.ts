@@ -15,11 +15,11 @@ export const pricingPlans = [
         paymentLink:
             isDevelopment
                 ? process.env.STRIPE_BASIC_PAYMENTLINK_DEV!
-                : "",
+                : process.env.STRIPE_BASIC_PAYMENTLINK_PRD!,
         priceId:
             isDevelopment
                 ? process.env.STRIPE_BASIC_PRICEID_DEV!
-                : "",
+                : process.env.STRIPE_BASIC_PRICEID_PRD!,
     },
     {
         id: "pro",
@@ -35,11 +35,11 @@ export const pricingPlans = [
         paymentLink:
             isDevelopment
                 ? process.env.STRIPE_PRO_PAYMENTLINK_DEV!
-                : "",
+                : process.env.STRIPE_PRO_PAYMENTLINK_PRD!,
         priceId:
             isDevelopment
                 ? process.env.STRIPE_PRO_PRICEID_DEV!
-                : "",
+                : process.env.STRIPE_PRO_PRICEID_PRD!,
     },
 ];
 
