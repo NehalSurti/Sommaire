@@ -4,27 +4,26 @@ A full-stack SaaS that converts long PDFs into beautiful, concise summary reels 
 
 ## ✨ Features
 
-- PDF Upload with AWS s3
+- PDF Upload with AWS S3
 - Text Extraction using LangChain
 - AI Summarization via Gemini
 - Authentication and user management (Clerk)
 - Subscription billing with Stripe (Basic & Pro Plans)
 - Reels-style interactive summary viewer
-- Admin dashboard and deletion logic
 - Responsive UI with Tailwind CSS v4 + Framer Motion
-- Deployed on Vercel using Next.js 15 server actions
+- Deployed on Vercel using Next.js
 
 ## 🧱 Tech Stack
 
-| Area         | Tech |
-|--------------|------|
+| Area         | Tech                                      |
+| ------------ | ----------------------------------------- |
 | Frontend     | Next.js 15, React 19, Tailwind, ShadCN UI |
-| Backend      | Server Actions, Neon DB (PostgreSQL) |
-| Auth         | Clerk |
-| File Uploads | s3 |
-| AI Services  | Gemini AI |
-| Payments     | Stripe |
-| Deployment   | Vercel |
+| Backend      | Server Actions, Neon DB (PostgreSQL)      |
+| Auth         | Clerk                                     |
+| File Uploads | S3                                        |
+| AI Services  | Gemini AI                                 |
+| Payments     | Stripe                                    |
+| Deployment   | Vercel                                    |
 
 ## 🧠 Architecture Overview
 
@@ -63,4 +62,6 @@ graph TD
     style H fill:#ecfccb,stroke:#84cc16,stroke-width:2px
 ```
 
+## 🎥 Demo Video
 
+https://github.com/user-attachments/assets/33eb0970-de99-4dc2-b989-062e4afdfa48
