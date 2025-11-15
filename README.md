@@ -65,3 +65,5 @@ graph TD
 ## 🎥 Demo Video
 
 https://github.com/user-attachments/assets/33eb0970-de99-4dc2-b989-062e4afdfa48
+
+https://github.com/user-attachments/assets/51e82d83-845f-4519-a642-50645267ad06
