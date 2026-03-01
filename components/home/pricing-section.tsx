@@ -37,7 +37,7 @@ const PricingCard = ({
       <div
         className={cn(
           "relative flex flex-col h-full gap-4 lg:gap-8 z-10 p-8 border-[1px] border-gray-500/20 rounded-2xl",
-          id === "pro" && "border-rose-500 gap-5 border-2"
+          id === "pro" && "border-rose-500 gap-5 border-2",
         )}
       >
         <div className="flex justify-between items-center gap-4">
@@ -53,14 +53,17 @@ const PricingCard = ({
             <p className="text-xs">/month</p>
           </div>
         </div>
-        <div className="space-y-2.5 leading-relaxed text-base flex-1">
+        <ul className="space-y-2.5 leading-relaxed text-base flex-1 list-none p-0 m-0">
           {items.map((item, idx) => (
             <li key={idx} className="flex items-center gap-2">
-              <CheckIcon></CheckIcon>
+              <CheckIcon
+                className="w-4 h-4 text-rose-500"
+                aria-hidden="true"
+              ></CheckIcon>
               <span>{item}</span>
             </li>
           ))}
-        </div>
+        </ul>
         <div className="space-y-2 flex justify-center w-full">
           <PricingCardButton
             id={id}
