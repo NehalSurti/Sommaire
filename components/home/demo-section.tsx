@@ -25,8 +25,8 @@ export default function DemoSection() {
           </div>
           <div className="text-center mb-16">
             <MotionH3
-              initial={{ y: 20, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
+              initial={{ y: 20}}
+              whileInView={{ y: 0}}
               transition={{
                 type: "spring",
                 stiffness: 50,
